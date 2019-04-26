@@ -49,6 +49,13 @@ constexpr auto TEST_RETRY_PERIOD = std::chrono::milliseconds(50);
 // (rounded up)
 constexpr size_t MAX_MESSAGE_BODY = 3100;
 
+struct event_t {
+    const std::string swarm_id;
+    const std::string event_type;
+    const std::string our_id;
+    const std::string other_id;
+};
+
 static void log_error(const error_code& ec) {
     BOOST_LOG_TRIVIAL(error)
         << boost::format("Error(%1%): %2%\n") % ec.value() % ec.message();
@@ -138,6 +145,43 @@ parse_swarm_update(const std::shared_ptr<std::string>& response_body,
         BOOST_LOG_TRIVIAL(error)
             << "Exception caught on swarm update: " << e.what();
     }
+}
+
+void log_event(boost::asio::io_context& ioc, const event_t& event) {
+    BOOST_LOG_TRIVIAL(info) << "Logging event";
+
+    const std::string ip = "127.0.0.1";
+    const uint16_t port = 38157;
+    const std::string target = "/json_rpc";
+
+    const boost::format formatter = boost::format(R"#({
+            "jsonrpc":"2.0",
+            "id":"0",
+            "method":"report_event",
+            "params": {
+                "event": {
+                    "swarm_id": "%1%",
+                    "event_type": "%2%",
+                    "snode_id": "%3%",
+                    "other_id": "%4%"
+                }
+            }
+        })#") % event.swarm_id % event.event_type % event.our_id % event.other_id;
+
+    const std::string req_body = formatter.str();
+
+    auto req = std::make_shared<request_t>();
+
+    req->body() = req_body;
+    req->method(http::verb::post);
+    req->target(target);
+    req->prepare_payload();
+
+    make_http_request(ioc, ip, port, req,
+                      [&](const sn_response_t&& res) {
+                            BOOST_LOG_TRIVIAL(error)
+                                << "Result body: " << *res.body;
+                      });
 }
 
 void request_swarm_update(boost::asio::io_context& ioc,
@@ -559,6 +603,9 @@ void connection_t::process_store(const json& params) {
     const auto nonce = params["nonce"].get<std::string>();
     const auto timestamp = params["timestamp"].get<std::string>();
     const auto data = params["data"].get<std::string>();
+
+    const event_t& event{"0", "clientMessage", "E35B7CF5057845284740AF496EC323148DB68AC2553A05E4677B96F3AFDABCD1", ""};
+    log_event(ioc_, event);
 
     if (pubKey.size() != 66) {
         response_.result(http::status::bad_request);
