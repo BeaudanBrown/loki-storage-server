@@ -189,6 +189,10 @@ class ServiceNode {
 
     bool is_snode_address_known(const std::string&);
 
+    swarm_id_t get_our_swarm_id();
+
+    sn_record_t get_our_address();
+
     /// return all messages for a particular PK (in JSON)
     bool
     get_all_messages(std::vector<service_node::storage::Item>& all_entries) const;

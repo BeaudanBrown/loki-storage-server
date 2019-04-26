@@ -828,6 +828,14 @@ void ServiceNode::process_push_batch(const std::string& blob) {
     BOOST_LOG_TRIVIAL(trace) << "saving all: end";
 }
 
+swarm_id_t ServiceNode::get_our_swarm_id() {
+    return swarm_->our_swarm_id();
+}
+
+sn_record_t ServiceNode::get_our_address() {
+    return our_address_;
+}
+
 bool ServiceNode::is_pubkey_for_us(const std::string& pk) const {
     if (!swarm_) {
         BOOST_LOG_TRIVIAL(error) << "swarm data missing";

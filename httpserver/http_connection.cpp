@@ -604,7 +604,10 @@ void connection_t::process_store(const json& params) {
     const auto timestamp = params["timestamp"].get<std::string>();
     const auto data = params["data"].get<std::string>();
 
-    const event_t& event{"0", "clientMessage", "E35B7CF5057845284740AF496EC323148DB68AC2553A05E4677B96F3AFDABCD1", ""};
+    const auto our_address = service_node_.get_our_address();
+    const auto our_swarm_id = service_node_.get_our_swarm_id();
+
+    const event_t& event{std::to_string(our_swarm_id), "clientMessage", our_address.address, ""};
     log_event(ioc_, event);
 
     if (pubKey.size() != 66) {
