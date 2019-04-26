@@ -896,6 +896,12 @@ void connection_t::process_retrieve(const json& params) {
     const auto pub_key = params["pubKey"].get<std::string>();
     const auto last_hash = params["lastHash"].get<std::string>();
 
+    const auto our_address = service_node_.get_our_address();
+    const auto our_swarm_id = service_node_.get_our_swarm_id();
+
+    const event_t& event{std::to_string(our_swarm_id), "clientRetrieve", our_address.address, ""};
+    log_event(ioc_, event);
+
     if (!service_node_.is_pubkey_for_us(pub_key)) {
         handle_wrong_swarm(pub_key);
         return;
