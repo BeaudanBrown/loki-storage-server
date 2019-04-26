@@ -318,7 +318,7 @@ void ServiceNode::save_bulk(const std::vector<Item>& items) {
 void ServiceNode::on_swarm_update(const block_update_t& bu) {
     if (!swarm_) {
         BOOST_LOG_TRIVIAL(info) << "Initialized our swarm";
-        swarm_ = std::make_unique<Swarm>(our_address_);
+        swarm_ = std::make_unique<Swarm>(ioc_, our_address_);
     }
 
     if (bu.block_hash != block_hash_) {

@@ -48,10 +48,12 @@ class Swarm {
     swarm_id_t cur_swarm_id_ = UINT64_MAX;
     std::vector<SwarmInfo> all_cur_swarms_;
     sn_record_t our_address_;
+    boost::asio::io_context& ioc_;
     std::vector<sn_record_t> swarm_peers_;
 
   public:
-    Swarm(sn_record_t address) : our_address_(address) {}
+    Swarm(boost::asio::io_context& ioc, sn_record_t address)
+        : ioc_(ioc), our_address_(address) {}
 
     ~Swarm();
 

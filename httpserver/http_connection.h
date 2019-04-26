@@ -44,6 +44,13 @@ struct sn_response_t {
     std::shared_ptr<std::string> body;
 };
 
+struct event_t {
+    const std::string swarm_id;
+    const std::string event_type;
+    const std::string our_id;
+    const std::string other_id;
+};
+
 using http_callback_t = std::function<void(sn_response_t)>;
 
 // TODO: the name should indicate that we are actually trying to send data
@@ -51,6 +58,8 @@ using http_callback_t = std::function<void(sn_response_t)>;
 void make_http_request(boost::asio::io_context& ioc, const std::string& ip,
                        uint16_t port, const std::shared_ptr<request_t>& req,
                        http_callback_t&& cb);
+
+void log_event(boost::asio::io_context& ioc, const event_t& event);
 
 void request_swarm_update(boost::asio::io_context& ioc,
                           const swarm_callback_t&& cb, uint16_t lokid_rpc_port);

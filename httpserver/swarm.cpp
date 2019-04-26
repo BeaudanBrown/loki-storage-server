@@ -55,6 +55,11 @@ SwarmEvents Swarm::update_swarms(const all_swarms_t& swarms) {
             BOOST_LOG_TRIVIAL(info)
                 << "EVENT: got moved into a new swarm: " << our_swarm_id;
 
+            const event_t& event{std::to_string(cur_swarm_id_), "changedSwarm",
+                                 our_address_.address,
+                                 std::to_string(our_swarm_id)};
+            log_event(ioc_, event);
+
             /// Check that our old swarm still exists
             if (!swarm_exists(swarms, cur_swarm_id_)) {
 

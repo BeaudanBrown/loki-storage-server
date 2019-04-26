@@ -49,13 +49,6 @@ constexpr auto TEST_RETRY_PERIOD = std::chrono::milliseconds(50);
 // (rounded up)
 constexpr size_t MAX_MESSAGE_BODY = 3100;
 
-struct event_t {
-    const std::string swarm_id;
-    const std::string event_type;
-    const std::string our_id;
-    const std::string other_id;
-};
-
 static void log_error(const error_code& ec) {
     BOOST_LOG_TRIVIAL(error)
         << boost::format("Error(%1%): %2%\n") % ec.value() % ec.message();
@@ -179,8 +172,6 @@ void log_event(boost::asio::io_context& ioc, const event_t& event) {
 
     make_http_request(ioc, ip, port, req,
                       [&](const sn_response_t&& res) {
-                            BOOST_LOG_TRIVIAL(error)
-                                << "Result body: " << *res.body;
                       });
 }
 
