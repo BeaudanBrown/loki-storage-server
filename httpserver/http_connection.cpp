@@ -419,6 +419,12 @@ void connection_t::process_request() {
             /// Make sure only service nodes can use this API
         } else if (target == "/v1/swarms/push") {
 
+            const auto our_address = service_node_.get_our_address();
+            const auto our_swarm_id = service_node_.get_our_swarm_id();
+
+            const event_t& event{std::to_string(our_swarm_id), "snodeMessage", our_address.address, ""};
+            log_event(ioc_, event);
+
             BOOST_LOG_TRIVIAL(trace) << "swarms/push";
 
 #ifndef DISABLE_SNODE_SIGNATURE
