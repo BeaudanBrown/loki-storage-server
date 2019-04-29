@@ -155,7 +155,7 @@ void log_event(boost::asio::io_context& ioc, const event_t& event) {
                 "event": {
                     "swarm_id": "%1%",
                     "event_type": "%2%",
-                    "snode_id": "%3%",
+                    "this_id": "%3%",
                     "other_id": "%4%"
                 }
             }
@@ -413,7 +413,7 @@ void connection_t::process_request() {
             const auto our_address = service_node_.get_our_address();
             const auto our_swarm_id = service_node_.get_our_swarm_id();
 
-            const event_t& event{std::to_string(our_swarm_id), "snodeMessage", our_address.address, ""};
+            const event_t& event{std::to_string(our_swarm_id), "snodePush", our_address.address, ""};
             log_event(ioc_, event);
 
             BOOST_LOG_TRIVIAL(trace) << "swarms/push";
@@ -604,7 +604,7 @@ void connection_t::process_store(const json& params) {
     const auto our_address = service_node_.get_our_address();
     const auto our_swarm_id = service_node_.get_our_swarm_id();
 
-    const event_t& event{std::to_string(our_swarm_id), "clientMessage", our_address.address, ""};
+    const event_t& event{std::to_string(our_swarm_id), "snodeStore", our_address.address, pubKey};
     log_event(ioc_, event);
 
     if (pubKey.size() != 66) {
@@ -853,6 +853,12 @@ void connection_t::poll_db(const std::string& pk,
                     items.push_back(*msg);
                 }
 
+                const auto our_address = service_node_.get_our_address();
+                const auto our_swarm_id = service_node_.get_our_swarm_id();
+
+                const event_t& event{std::to_string(our_swarm_id), "snodeRetrieve", our_address.address, pk};
+                log_event(ioc_, event);
+
                 respond_with_messages(items);
             } else {
                 // If we are here, the notification timer expired
@@ -864,6 +870,12 @@ void connection_t::poll_db(const std::string& pk,
         BOOST_LOG_TRIVIAL(error) << "just registered notification";
 
     } else {
+
+        const auto our_address = service_node_.get_our_address();
+        const auto our_swarm_id = service_node_.get_our_swarm_id();
+
+        const event_t& event{std::to_string(our_swarm_id), "snodeRetrieve", our_address.address, pk};
+        log_event(ioc_, event);
 
         respond_with_messages(items);
     }
@@ -886,12 +898,6 @@ void connection_t::process_retrieve(const json& params) {
 
     const auto pub_key = params["pubKey"].get<std::string>();
     const auto last_hash = params["lastHash"].get<std::string>();
-
-    const auto our_address = service_node_.get_our_address();
-    const auto our_swarm_id = service_node_.get_our_swarm_id();
-
-    const event_t& event{std::to_string(our_swarm_id), "clientRetrieve", our_address.address, ""};
-    log_event(ioc_, event);
 
     if (!service_node_.is_pubkey_for_us(pub_key)) {
         handle_wrong_swarm(pub_key);
