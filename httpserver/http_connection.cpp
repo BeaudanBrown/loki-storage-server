@@ -409,13 +409,6 @@ void connection_t::process_request() {
 
             /// Make sure only service nodes can use this API
         } else if (target == "/v1/swarms/push") {
-
-            const auto our_address = service_node_.get_our_address();
-            const auto our_swarm_id = service_node_.get_our_swarm_id();
-
-            const event_t& event{std::to_string(our_swarm_id), "snodePush", our_address.address, ""};
-            log_event(ioc_, event);
-
             BOOST_LOG_TRIVIAL(trace) << "swarms/push";
 
 #ifndef DISABLE_SNODE_SIGNATURE
@@ -600,12 +593,6 @@ void connection_t::process_store(const json& params) {
     const auto nonce = params["nonce"].get<std::string>();
     const auto timestamp = params["timestamp"].get<std::string>();
     const auto data = params["data"].get<std::string>();
-
-    const auto our_address = service_node_.get_our_address();
-    const auto our_swarm_id = service_node_.get_our_swarm_id();
-
-    const event_t& event{std::to_string(our_swarm_id), "snodeStore", our_address.address, pubKey};
-    log_event(ioc_, event);
 
     if (pubKey.size() != 66) {
         response_.result(http::status::bad_request);

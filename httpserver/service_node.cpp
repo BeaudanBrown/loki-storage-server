@@ -184,6 +184,9 @@ void ServiceNode::send_sn_request(const std::shared_ptr<request_t>& req,
 
                 std::make_shared<FailedRequestHandler>(ioc_, sn, req)
                     ->init_timer();
+            } else {
+                const event_t& event{ std::to_string(swarm_->our_swarm_id()), "snodePush", our_address_.address, sn.address};
+                log_event(ioc_, event);
             }
         });
 }
